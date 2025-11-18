@@ -1,0 +1,8 @@
+Django>=3.2
+gunicorn
+beautifulsoup4
+requests
+markdown
+cryptography
+pymysql
+whitenoise
