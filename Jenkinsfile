@@ -40,29 +40,30 @@ pipeline {
                 }
             }
         }
+	stage('Update K8s Manifest') {
+		steps {
+		       withCredentials([string(credentialsId: GIT_CRED, variable: 'TOKEN')]) {
 
-        stage('Update K8s Manifest') {
-            steps {
-                withCredentials([
-                    string(credentialsId: GIT_CRED, variable: 'TOKEN')
-                ]) {
-                    sh """
-                        git config --global user.email "jenkins@mysite.com"
-                        git config --global user.name "Jenkins CI"
+	            sh """
+	                git config --global user.email "jenkins@mysite.com"
+	                git config --global user.name "Jenkins CI"
 
-                        git clone https://${TOKEN}@github.com/harryjdh/mysite-manifests.git manifests
+	                # clone manifests repo
+	                git clone https://${TOKEN}@github.com/harryjdh/mysite-manifests.git
+	                cd mysite-manifests
 
-                        cd manifests
+	                # 이미지 태그 변경
+	                sed -i "s|harryjdh/mysite:.*|harryjdh/mysite:${IMAGE_TAG}|g" deployment.yaml
 
-                        sed -i "s|harryjdh/mysite:.*|harryjdh/mysite:${IMAGE_TAG}|g" deployment.yaml
+	                # 커밋 및 푸시
+	                git add deployment.yaml
+	                git commit -m "Update image tag to ${IMAGE_TAG}"
+	                git push https://${TOKEN}@github.com/harryjdh/mysite-manifests.git main
+	            """
+	        }
+	    }
+}
 
-                        git add deployment.yaml
-                        git commit -m "Update image tag to ${IMAGE_TAG}" || true
-                        git push origin master
-                    """
-                }
-            }
-        }
     }
 
     post {
