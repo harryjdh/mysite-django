@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_REPO = "harryjdh/mysite"
-        DOCKERHUB_CRED = "harryjdh"      // Docker Hub credential ID
+        DOCKERHUB_CRED = "dockerhub"      // Docker Hub credential ID
         IMAGE_TAG = "${BUILD_NUMBER}"
         GIT_CRED = "github-token"         // GitHub PAT credential ID
     }
