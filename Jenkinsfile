@@ -37,21 +37,21 @@ pipeline {
 
         stage('Update K8s Manifest') {
             steps {
-                withCredentials([string(credentialsId: "github-token", variable: 'TOKEN')]) {
+                withCredentials([usernamePassword(credentialsId: GIT_CRED, usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
 
                     sh """
                         git config --global user.email "jenkins@mysite.com"
                         git config --global user.name "Jenkins CI"
 
                         rm -rf mysite-manifests
-                        git clone https://$TOKEN@github.com/harryjdh/mysite-manifests.git
+                        git clone https://${GIT_USER}:${GIT_PASS}@github.com/harryjdh/mysite-manifests.git
                         cd mysite-manifests
 
                         sed -i "s|harryjdh/mysite:.*|harryjdh/mysite:${IMAGE_TAG}|g" deployment.yaml
 
                         git add deployment.yaml
                         git commit -m "Update image tag to ${IMAGE_TAG}" || echo "No changes to commit"
-                        git push https://$TOKEN@github.com/harryjdh/mysite-manifests.git main
+                        git push https://${GIT_USER}:${GIT_PASS}@github.com/harryjdh/mysite-manifests.git main
                     """
                 }
             }
