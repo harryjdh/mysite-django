@@ -44,14 +44,14 @@ pipeline {
                         git config --global user.name "Jenkins CI"
 
                         rm -rf mysite-manifests
-                        git clone https://${TOKEN}@github.com/harryjdh/mysite-manifests.git
+                        git clone https://$TOKEN@github.com/harryjdh/mysite-manifests.git
                         cd mysite-manifests
 
                         sed -i "s|harryjdh/mysite:.*|harryjdh/mysite:${IMAGE_TAG}|g" deployment.yaml
 
                         git add deployment.yaml
                         git commit -m "Update image tag to ${IMAGE_TAG}" || echo "No changes to commit"
-                        git push https://${TOKEN}@github.com/harryjdh/mysite-manifests.git main
+                        git push https://$TOKEN@github.com/harryjdh/mysite-manifests.git main
                     """
                 }
             }
