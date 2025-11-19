@@ -3,9 +3,9 @@ pipeline {
 
     environment {
         DOCKERHUB_REPO = "harryjdh/mysite"
-        DOCKERHUB_CRED = "dockerhub"      // Docker Hub credential ID
+        DOCKERHUB_CRED = "dockerhub"
         IMAGE_TAG = "${BUILD_NUMBER}"
-        GIT_CRED = "github-token"         // GitHub PAT credential ID
+        GIT_CRED = "github_pat"   // 너가 만든 Credential ID
     }
 
     stages {
@@ -26,13 +26,7 @@ pipeline {
 
         stage('Login & Push') {
             steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: DOCKERHUB_CRED,
-                        usernameVariable: 'USER',
-                        passwordVariable: 'PASS'
-                    )
-                ]) {
+                withCredentials([usernamePassword(credentialsId: DOCKERHUB_CRED, usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh """
                         echo "$PASS" | docker login -u "$USER" --password-stdin
                         docker push $DOCKERHUB_REPO:$IMAGE_TAG
@@ -40,35 +34,33 @@ pipeline {
                 }
             }
         }
-	stage('Update K8s Manifest') {
-		steps {
-		       withCredentials([string(credentialsId: GIT_CRED, variable: 'TOKEN')]) {
 
-	            sh """
-	                git config --global user.email "jenkins@mysite.com"
-	                git config --global user.name "Jenkins CI"
+        stage('Update K8s Manifest') {
+            steps {
+                withCredentials([string(credentialsId: GIT_CRED, variable: 'TOKEN')]) {
 
-	                # clone manifests repo
-	                git clone https://${TOKEN}@github.com/harryjdh/mysite-manifests.git
-	                cd mysite-manifests
+                    sh """
+                        git config --global user.email "jenkins@mysite.com"
+                        git config --global user.name "Jenkins CI"
 
-	                # 이미지 태그 변경
-	                sed -i "s|harryjdh/mysite:.*|harryjdh/mysite:${IMAGE_TAG}|g" deployment.yaml
+                        rm -rf mysite-manifests
+                        git clone https://${TOKEN}@github.com/harryjdh/mysite-manifests.git
+                        cd mysite-manifests
 
-	                # 커밋 및 푸시
-	                git add deployment.yaml
-	                git commit -m "Update image tag to ${IMAGE_TAG}"
-	                git push https://${TOKEN}@github.com/harryjdh/mysite-manifests.git main
-	            """
-	        }
-	    }
-}
+                        sed -i "s|harryjdh/mysite:.*|harryjdh/mysite:${IMAGE_TAG}|g" deployment.yaml
 
+                        git add deployment.yaml
+                        git commit -m "Update image tag to ${IMAGE_TAG}" || echo "No changes to commit"
+                        git push https://${TOKEN}@github.com/harryjdh/mysite-manifests.git main
+                    """
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo "🎉 Image pushed + Manifest updated to tag: $IMAGE_TAG"
+            echo "SUCCESS: Image pushed and manifest updated!"
         }
     }
 }
