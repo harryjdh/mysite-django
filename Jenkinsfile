@@ -5,7 +5,7 @@ pipeline {
         DOCKERHUB_REPO = "harryjdh/mysite"
         DOCKERHUB_CRED = "dockerhub"
         IMAGE_TAG = "${BUILD_NUMBER}"
-        GIT_CRED = "github_pat"   // 너가 만든 Credential ID
+        GIT_CRED = "github-token"
     }
 
     stages {
