@@ -50,7 +50,6 @@ pipeline {
                         git config --global user.email "jenkins@mysite.com"
                         git config --global user.name "Jenkins CI"
 
-                        rm -rf manifests
                         git clone https://$TOKEN@github.com/harryjdh/mysite-manifests.git manifests
 
                         cd manifests
@@ -59,7 +58,7 @@ pipeline {
 
                         git add deployment.yaml
                         git commit -m "Update image tag to ${IMAGE_TAG}" || true
-                        git push origin main
+                        git push origin master
                     """
                 }
             }
