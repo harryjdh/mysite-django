@@ -50,7 +50,7 @@ pipeline {
                         git config --global user.email "jenkins@mysite.com"
                         git config --global user.name "Jenkins CI"
 
-                        git clone https://$TOKEN@github.com/harryjdh/mysite-manifests.git manifests
+                        git clone https://${TOKEN}@github.com/harryjdh/mysite-manifests.git manifests
 
                         cd manifests
 
